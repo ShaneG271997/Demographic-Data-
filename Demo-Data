@@ -1,0 +1,149 @@
+git remote add origin https://github.com/ShaneG271997/Demographic-Data-.git
+git branch -M main
+git push -u origin main
+# demographic_data_analyzer.py
+import pandas as pd
+
+def load_data(filename):
+    """
+    Loads the dataset from a CSV file into a pandas DataFrame.
+    
+    Args:
+    filename (str): The path to the CSV file.
+    
+    Returns:
+    pd.DataFrame: The loaded DataFrame.
+    """
+    data = pd.read_csv(filename)
+    return data
+
+def race_count(data):
+    """
+    Returns the count of people from each race in the dataset as a Pandas series.
+    
+    Args:
+    data (pd.DataFrame): The input dataset.
+    
+    Returns:
+    pd.Series: The count of each race in the dataset.
+    """
+    return data['race'].value_counts()
+
+def average_age_men(data):
+    """
+    Returns the average age of men in the dataset.
+    
+    Args:
+    data (pd.DataFrame): The input dataset.
+    
+    Returns:
+    float: The average age of men.
+    """
+    return data[data['sex'] == 'Male']['age'].mean()
+
+def percentage_bachelors(data):
+    """
+    Returns the percentage of people who have a Bachelor's degree.
+    
+    Args:
+    data (pd.DataFrame): The input dataset.
+    
+    Returns:
+    float: The percentage of people with a Bachelor's degree.
+    """
+    bachelors = data[data['education'] == 'Bachelors']
+    return (len(bachelors) / len(data)) * 100
+
+def percentage_advanced_education(data):
+    """
+    Returns the percentage of people with advanced education (Bachelors, Masters, or Doctorate)
+    who earn more than 50K.
+    
+    Args:
+    data (pd.DataFrame): The input dataset.
+    
+    Returns:
+    float: The percentage of people with advanced education who earn more than 50K.
+    """
+    advanced_education = data[data['education'].isin(['Bachelors', 'Masters', 'Doctorate'])]
+    earn_more_50k = advanced_education[advanced_education['salary'] == '>50K']
+    return (len(earn_more_50k) / len(advanced_education)) * 100
+
+def percentage_no_advanced_education(data):
+    """
+    Returns the percentage of people without advanced education who earn more than 50K.
+    
+    Args:
+    data (pd.DataFrame): The input dataset.
+    
+    Returns:
+    float: The percentage of people without advanced education who earn more than 50K.
+    """
+    no_advanced_education = data[~data['education'].isin(['Bachelors', 'Masters', 'Doctorate'])]
+    earn_more_50k = no_advanced_education[no_advanced_education['salary'] == '>50K']
+    return (len(earn_more_50k) / len(no_advanced_education)) * 100
+
+def minimum_hours_per_week(data):
+    """
+    Returns the minimum number of hours a person works per week.
+    
+    Args:
+    data (pd.DataFrame): The input dataset.
+    
+    Returns:
+    int: The minimum number of hours worked per week.
+    """
+    return data['hours-per-week'].min()
+
+def percentage_minimum_hours_with_salary_above_50k(data):
+    """
+    Returns the percentage of people who work the minimum number of hours per week and earn more than 50K.
+    
+    Args:
+    data (pd.DataFrame): The input dataset.
+    
+    Returns:
+    float: The percentage of people who work the minimum number of hours and earn more than 50K.
+    """
+    min_hours = minimum_hours_per_week(data)
+    min_hours_data = data[data['hours-per-week'] == min_hours]
+    earn_more_50k = min_hours_data[min_hours_data['salary'] == '>50K']
+    return (len(earn_more_50k) / len(min_hours_data)) * 100
+
+def country_with_highest_percentage_earn_more_50k(data):
+    """
+    Returns the country with the highest percentage of people earning more than 50K and the percentage.
+    
+    Args:
+    data (pd.DataFrame): The input dataset.
+    
+    Returns:
+    tuple: The country with the highest percentage and the percentage.
+    """
+    countries = data['native-country'].unique()
+    max_percentage = 0
+    country_with_max_percentage = ""
+    
+    for country in countries:
+        country_data = data[data['native-country'] == country]
+        earn_more_50k = country_data[country_data['salary'] == '>50K']
+        percentage = (len(earn_more_50k) / len(country_data)) * 100
+        
+        if percentage > max_percentage:
+            max_percentage = percentage
+            country_with_max_percentage = country
+    
+    return country_with_max_percentage, round(max_percentage, 1)
+
+def most_popular_occupation_in_india(data):
+    """
+    Identifies the most popular occupation for people who earn more than 50K in India.
+    
+    Args:
+    data (pd.DataFrame): The input dataset.
+    
+    Returns:
+    str: The most popular occupation in India for those who earn more than 50K.
+    """
+    india_data = data[(data['native-country'] == 'India') & (data['salary'] == '>50K')]
+    return india_data['occupation'].mode()[0]
